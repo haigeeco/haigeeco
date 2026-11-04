@@ -1,0 +1,48 @@
+name: Backup database (pg_dump)
+
+# Prasyarat: set secret SUPABASE_DB_URL (connection string Postgres Supabase,
+# Supabase Dashboard -> Project Settings -> Database -> Connection string -> URI).
+# Selama secret belum diset, workflow dilewati tanpa gagal.
+#
+# Berjalan harian pukul 18:00 UTC (01:00 WIB) dan bisa dipicu manual dari tab Actions.
+
+on:
+  schedule:
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cek kredensial
+        id: creds
+        run: echo "configured=${{ secrets.SUPABASE_DB_URL != '' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Lewati bila SUPABASE_DB_URL belum diset
+        if: steps.creds.outputs.configured != 'true'
+        run: echo "SUPABASE_DB_URL belum diset — lewati backup."
+
+      - name: Install PostgreSQL client
+        if: steps.creds.outputs.configured == 'true'
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: pg_dump ke file terkompresi
+        if: steps.creds.outputs.configured == 'true'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          mkdir -p backup
+          pg_dump --no-owner --no-privileges "$SUPABASE_DB_URL" | gzip > "backup/geeco-$(date -u +%Y%m%d).sql.gz"
+          ls -lh backup
+
+      - name: Unggah sebagai artifact
+        if: steps.creds.outputs.configured == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: backup/*.sql.gz
+          retention-days: 30

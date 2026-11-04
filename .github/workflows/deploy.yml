@@ -1,0 +1,65 @@
+name: Deploy ke Cloudflare Pages
+
+# Prasyarat (atur di GitHub: Settings -> Secrets and variables -> Actions):
+#   Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID,
+#            NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+#   Variables: CLOUDFLARE_PROJECT_NAME (nama proyek Pages, mis. "geeco")
+#
+# Selama CLOUDFLARE_API_TOKEN belum diset, langkah deploy otomatis dilewati
+# sehingga workflow tidak gagal. Alternatif: pakai integrasi Git Cloudflare Pages
+# (hubungkan repo di dashboard, build command "npm run build", output "out").
+#
+# Setelah deploy, set kredensial Supabase di Cloudflare Pages
+# (Settings -> Environment variables) agar situs publik berisi data.
+# Deploy hook untuk blog diatur di aplikasi: /admin/settings -> Situs Publik.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cek kredensial Cloudflare
+        id: creds
+        run: echo "configured=${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Lewati bila kredensial belum diset
+        if: steps.creds.outputs.configured != 'true'
+        run: echo "CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID belum diset — lewati deploy."
+
+      - uses: actions/setup-node@v4
+        if: steps.creds.outputs.configured == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependensi
+        if: steps.creds.outputs.configured == 'true'
+        run: npm ci
+
+      - name: Build static export
+        if: steps.creds.outputs.configured == 'true'
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Publish ke Cloudflare Pages
+        if: steps.creds.outputs.configured == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME || 'geeco' }}

@@ -1,0 +1,14 @@
+# Konfigurasi Supabase CLI untuk proyek Gee Co.
+#
+# Deploy Edge Function (sekali / tiap ada perubahan):
+#   supabase login
+#   supabase link --project-ref <project-ref>   # ref ada di URL proyek Supabase
+#   supabase functions deploy admin-users
+#
+# verify_jwt = true (default) → fungsi hanya bisa dipanggil dengan JWT yang valid;
+# peran superuser tetap diverifikasi lagi di dalam fungsi.
+
+project_id = "haigeeco"
+
+[functions.admin-users]
+verify_jwt = true
