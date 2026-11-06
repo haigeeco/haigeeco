@@ -47,13 +47,15 @@ npm run dev                  # http://localhost:3000
 
 1. **Migrasi** — jalankan berurutan di SQL Editor: `supabase/migrations/0001_init.sql`,
    `0002_profiles_email.sql`, `0003_client_prices.sql`, `0004_security_hardening.sql`,
-   `0005_settings_read.sql` (semuanya idempoten, aman diulang).
-2. **Edge Function** (untuk membuat/menghapus akun):
+   `0005_settings_read.sql`, `0006_site_config.sql` (semuanya idempoten, aman diulang).
+2. **Edge Function** — `admin-users` (membuat/menghapus akun) dan `rebuild-site`
+   (memicu rebuild blog):
 
    ```bash
    supabase login
    supabase link --project-ref <project-ref>
    supabase functions deploy admin-users
+   supabase functions deploy rebuild-site
    ```
 
    Fungsi memakai `service_role` yang tersedia otomatis di runtime; klien tetap hanya memakai
@@ -85,8 +87,9 @@ Test berada di `src/**/*.test.ts` dan menargetkan fungsi murni (mis. `src/lib/ca
   langkah deploy dilewati otomatis bila belum diset). Alternatif: integrasi Git Cloudflare Pages
   (build command `npm run build`, output directory `out`).
 - `.github/workflows/backup.yml` — `pg_dump` harian sebagai artifact (butuh secret `SUPABASE_DB_URL`).
-- **Deploy hook blog** diatur di dalam aplikasi: `/admin/settings` → **Situs Publik** (disimpan di
-  database, tidak ikut ke bundle publik).
+- **Deploy hook blog** diatur di dalam aplikasi: `/admin/settings` → **Situs Publik**. URL disimpan
+  di tabel `site_config` (hanya superuser dapat membacanya, tidak ikut ke bundle publik); saat
+  artikel pertama kali diterbitkan, klien memanggil Edge Function `rebuild-site` yang memicu hook.
 - **Logo** dipakai di header publik, `/login`, sidebar admin, invoice, dan favicon/ikon tab.
   Default dari `public/img/logo-320.png` (sumber 1254px disimpan di `assets/brand/` agar tidak
   ikut di-deploy); unggahan di `/admin/settings` menimpanya (disimpan di Storage).

@@ -72,7 +72,6 @@ export interface SettingsRow {
   tax_enabled_by_default: boolean;
   default_notes: string;
   terms: string;
-  deploy_hook_url: string;
   updated_at: string;
 }
 
@@ -209,7 +208,6 @@ export function toSettings(row: Partial<SettingsRow>): CompanySettings {
     taxEnabledByDefault: row.tax_enabled_by_default ?? base.taxEnabledByDefault,
     defaultNotes: row.default_notes ?? base.defaultNotes,
     terms: row.terms ?? base.terms,
-    deployHookUrl: row.deploy_hook_url ?? base.deployHookUrl,
   };
 }
 
@@ -234,7 +232,6 @@ export function settingsToRow(settings: CompanySettings) {
     tax_enabled_by_default: settings.taxEnabledByDefault,
     default_notes: settings.defaultNotes,
     terms: settings.terms,
-    deploy_hook_url: settings.deployHookUrl,
   };
 }
 

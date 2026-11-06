@@ -18,7 +18,6 @@ export interface CompanySettings {
   taxEnabledByDefault: boolean;
   defaultNotes: string;
   terms: string;
-  deployHookUrl: string;
 }
 
 export interface Client {

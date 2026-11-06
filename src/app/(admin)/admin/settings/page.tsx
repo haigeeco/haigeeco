@@ -3,6 +3,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import type { CompanySettings } from "@/lib/types";
 import { useSettings, useSaveSettings } from "@/lib/db/settings";
+import { useDeployHookUrl, useSaveDeployHookUrl } from "@/lib/db/siteConfig";
 import { useClients } from "@/lib/db/clients";
 import { useProducts } from "@/lib/db/products";
 import { useInvoices } from "@/lib/db/invoices";
@@ -148,23 +149,6 @@ function SettingsForm({ settings }: { settings: CompanySettings }) {
       </Card>
 
       <Card className="p-5">
-        <SectionTitle
-          title="Situs Publik"
-          description="Deploy hook dipicu saat artikel blog pertama kali diterbitkan, agar situs dibangun ulang."
-        />
-        <Field
-          label="Cloudflare Deploy Hook URL"
-          hint="Opsional. Cloudflare Pages → Settings → Builds & deployments → Deploy hooks."
-        >
-          <Input
-            value={form.deployHookUrl}
-            onChange={(e) => update({ deployHookUrl: e.target.value })}
-            placeholder="https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/…"
-          />
-        </Field>
-      </Card>
-
-      <Card className="p-5">
         <SectionTitle title="Default Invoice" description="Nilai awal saat membuat invoice baru." />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="Prefix Nomor Invoice" hint="Contoh: GC → GC/2026/0001">
@@ -226,6 +210,80 @@ function SettingsForm({ settings }: { settings: CompanySettings }) {
         </Button>
       </div>
     </form>
+  );
+}
+
+function SiteSection() {
+  const hookQuery = useDeployHookUrl();
+
+  if (hookQuery.isLoading) {
+    return (
+      <Card className="p-5">
+        <SectionTitle title="Situs Publik" />
+        <p className="text-sm text-slate-400">Memuat…</p>
+      </Card>
+    );
+  }
+
+  if (hookQuery.isError) {
+    return (
+      <Card className="p-5">
+        <SectionTitle title="Situs Publik" />
+        <p className="text-sm text-rose-600">Gagal memuat konfigurasi situs.</p>
+      </Card>
+    );
+  }
+
+  return <DeployHookForm initialUrl={hookQuery.data ?? ""} />;
+}
+
+function DeployHookForm({ initialUrl }: { initialUrl: string }) {
+  const saveHook = useSaveDeployHookUrl();
+  const [url, setUrl] = useState(initialUrl);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    setError("");
+    setSaved(false);
+    try {
+      await saveHook.mutateAsync(url);
+      setSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal menyimpan deploy hook.");
+    }
+  }
+
+  return (
+    <Card className="p-5">
+      <SectionTitle
+        title="Situs Publik"
+        description="Deploy hook dipicu saat artikel blog pertama kali diterbitkan, agar situs dibangun ulang. URL ini hanya bisa dibaca superuser."
+      />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field
+          label="Cloudflare Deploy Hook URL"
+          hint="Opsional. Cloudflare Pages → Settings → Builds & deployments → Deploy hooks."
+        >
+          <Input
+            value={url}
+            onChange={(event) => {
+              setUrl(event.target.value);
+              setSaved(false);
+            }}
+            placeholder="https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/…"
+          />
+        </Field>
+        <div className="flex items-center justify-end gap-3">
+          {error ? <span className="text-sm text-rose-600">{error}</span> : null}
+          {saved ? <span className="text-sm text-emerald-600">Tersimpan.</span> : null}
+          <Button type="submit" disabled={saveHook.isPending}>
+            {saveHook.isPending ? "Menyimpan…" : "Simpan Deploy Hook"}
+          </Button>
+        </div>
+      </form>
+    </Card>
   );
 }
 
@@ -307,6 +365,7 @@ export default function SettingsPage() {
       ) : (
         <div className="space-y-6">
           <SettingsForm settings={settingsQuery.data} />
+          <SiteSection />
           <DataSection />
         </div>
       )}

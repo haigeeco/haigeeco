@@ -27,7 +27,6 @@ export function defaultSettings(): CompanySettings {
     defaultNotes: "Terima kasih atas kepercayaan Anda.",
     terms:
       "Pembayaran ditransfer ke rekening di atas. Invoice ini sah tanpa tanda tangan basah.",
-    deployHookUrl: "",
   };
 }
 

@@ -12,3 +12,6 @@ project_id = "haigeeco"
 
 [functions.admin-users]
 verify_jwt = true
+
+[functions.rebuild-site]
+verify_jwt = true

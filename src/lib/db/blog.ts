@@ -63,12 +63,3 @@ export function useDeleteBlogPost() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: KEY }),
   });
 }
-
-export async function triggerDeployHook(url: string | undefined): Promise<void> {
-  if (!url) return;
-  try {
-    await fetch(url, { method: "POST" });
-  } catch {
-    // Non-fatal: artikel tetap tersimpan walau rebuild gagal dipicu.
-  }
-}

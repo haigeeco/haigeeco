@@ -5,14 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { BlogPost } from "@/lib/types";
 import { slugify } from "@/lib/format";
 import { canManageBlog, useCurrentProfile } from "@/lib/db/users";
-import {
-  blankBlogPost,
-  triggerDeployHook,
-  useBlogPosts,
-  useSaveBlogPost,
-} from "@/lib/db/blog";
+import { blankBlogPost, useBlogPosts, useSaveBlogPost } from "@/lib/db/blog";
 import { uploadPublicAsset } from "@/lib/db/storage";
-import { useSettings } from "@/lib/db/settings";
+import { triggerSiteRebuild } from "@/lib/db/siteConfig";
 import { Markdown } from "@/components/Markdown";
 import { Button, Card, Field, Input, LinkButton, PageHeader, Textarea } from "@/components/ui";
 
@@ -24,7 +19,6 @@ function BlogEditorInner() {
   const postsQuery = useBlogPosts();
   const profileQuery = useCurrentProfile();
   const savePost = useSaveBlogPost();
-  const deployHookUrl = useSettings().data?.deployHookUrl;
 
   const [edits, setEdits] = useState<Partial<BlogPost>>({});
   const [slugTouched, setSlugTouched] = useState(false);
@@ -86,7 +80,7 @@ function BlogEditorInner() {
     const wasPublished = Boolean(existing?.published);
     try {
       await savePost.mutateAsync({ ...form, title, slug, content_md });
-      if (form.published && !wasPublished) await triggerDeployHook(deployHookUrl);
+      if (form.published && !wasPublished) await triggerSiteRebuild();
       router.push("/admin/blog");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Gagal menyimpan artikel.";
