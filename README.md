@@ -82,14 +82,16 @@ Test berada di `src/**/*.test.ts` dan menargetkan fungsi murni (mis. `src/lib/ca
 
 - `.github/workflows/ci.yml` — `lint` + `tsc` + `test` + `build` pada setiap push/PR, plus
   `deno test` untuk Edge Function (job `edge-functions`).
-- `.github/workflows/deploy.yml` — deploy ke **Cloudflare Pages** (butuh secrets
-  `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, + variable `CLOUDFLARE_PROJECT_NAME`;
-  langkah deploy dilewati otomatis bila belum diset). Alternatif: integrasi Git Cloudflare Pages
-  (build command `npm run build`, output directory `out`).
+- **Deploy** ditangani langsung oleh **Cloudflare Pages Git integration** (proyek `geeco` →
+  https://geeco.pages.dev): setiap push ke `main`, Cloudflare menjalankan `npm run build`
+  (output `out`) dengan env `NEXT_PUBLIC_SUPABASE_*` dari dashboard Pages. Tidak perlu workflow
+  deploy atau API token Cloudflare.
 - `.github/workflows/backup.yml` — `pg_dump` harian sebagai artifact (butuh secret `SUPABASE_DB_URL`).
-- **Deploy hook blog** diatur di dalam aplikasi: `/admin/settings` → **Situs Publik**. URL disimpan
-  di tabel `site_config` (hanya superuser dapat membacanya, tidak ikut ke bundle publik); saat
-  artikel pertama kali diterbitkan, klien memanggil Edge Function `rebuild-site` yang memicu hook.
+- **Deploy hook blog** diatur di dalam aplikasi: `/admin/settings` → **Situs Publik**. Ambil URL
+  dari Cloudflare Pages → proyek `geeco` → **Settings → Builds & deployments → Deploy hooks**.
+  URL disimpan di tabel `site_config` (hanya superuser dapat membacanya, tidak ikut ke bundle
+  publik); saat artikel pertama kali diterbitkan, klien memanggil Edge Function `rebuild-site`
+  yang memicu hook.
 - **Logo** dipakai di header publik, `/login`, sidebar admin, invoice, dan favicon/ikon tab.
   Default dari `public/img/logo-320.png` (sumber 1254px disimpan di `assets/brand/` agar tidak
   ikut di-deploy); unggahan di `/admin/settings` menimpanya (disimpan di Storage).
