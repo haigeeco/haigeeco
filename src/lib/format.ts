@@ -13,12 +13,7 @@ export function formatNumber(value: number): string {
 }
 
 export function parseNumber(value: string): number {
-  if (typeof value !== "string") return 0;
-  const cleaned = value
-    .replace(/[^\d,.-]/g, "")
-    .replace(/\.(?=\d{3}\b)/g, "")
-    .replace(",", ".");
-  const parsed = Number.parseFloat(cleaned);
+  const parsed = Number.parseFloat(value);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 

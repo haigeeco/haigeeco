@@ -2,16 +2,9 @@ import { describe, expect, it } from "vitest";
 import { formatDate, formatIDR, parseNumber, slugify } from "./format";
 
 describe("parseNumber", () => {
-  it("mem-parsing format ribuan dengan titik", () => {
-    expect(parseNumber("1.234.567")).toBe(1_234_567);
-  });
-
-  it("mem-parsing desimal dengan koma", () => {
-    expect(parseNumber("1234567,5")).toBe(1_234_567.5);
-  });
-
-  it("mengabaikan simbol mata uang dan spasi", () => {
-    expect(parseNumber("Rp 1.850.000")).toBe(1_850_000);
+  it("mem-parsing angka polos dari input number", () => {
+    expect(parseNumber("1850000")).toBe(1_850_000);
+    expect(parseNumber("1234567.5")).toBe(1_234_567.5);
   });
 
   it("mengembalikan 0 untuk nilai tidak valid", () => {

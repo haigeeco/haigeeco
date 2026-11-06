@@ -112,11 +112,58 @@ body {
     padding: 0 !important;
     margin: 0 !important;
     max-width: none !important;
+    background: #ffffff !important;
+  }
+
+  .print-sheet {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
 
   .invoice-doc {
     max-width: none !important;
     padding: 0 !important;
     box-shadow: none !important;
+  }
+
+  /* A4 preview is a screen-only aid; print the sheet at full size. */
+  .a4-preview-frame {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .a4-sheet {
+    width: auto !important;
+    min-height: 0 !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* On paper always use the full table, never the mobile card list. */
+  .invoice-items-table {
+    display: block !important;
+  }
+
+  .invoice-items-mobile {
+    display: none !important;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  tr,
+  .doc-block,
+  .totals-block {
+    break-inside: avoid;
+  }
+
+  .page-break {
+    break-before: page;
   }
 }

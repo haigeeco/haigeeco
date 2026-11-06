@@ -46,8 +46,8 @@ npm run dev                  # http://localhost:3000
 ## Setup Supabase (sekali)
 
 1. **Migrasi** — jalankan berurutan di SQL Editor: `supabase/migrations/0001_init.sql`,
-   `0002_profiles_email.sql`, `0003_client_prices.sql`, `0004_security_hardening.sql`
-   (semuanya idempoten, aman diulang).
+   `0002_profiles_email.sql`, `0003_client_prices.sql`, `0004_security_hardening.sql`,
+   `0005_settings_read.sql` (semuanya idempoten, aman diulang).
 2. **Edge Function** (untuk membuat/menghapus akun):
 
    ```bash

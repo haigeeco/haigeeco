@@ -8,6 +8,7 @@ import { buildPriceIndex, priceHistory, resolveClientPrice } from "@/lib/pricing
 import { useProducts } from "@/lib/db/products";
 import { useClientPrices, useDeleteClientPrice, useSaveClientPrice } from "@/lib/db/clientPrices";
 import { Button, Field, Input, Modal } from "./ui";
+import { useFeedback } from "./feedback";
 
 interface Draft {
   price: string;
@@ -19,6 +20,7 @@ export function ClientPriceModal({ client, onClose }: { client: Client; onClose:
   const pricesQuery = useClientPrices();
   const savePrice = useSaveClientPrice();
   const deletePrice = useDeleteClientPrice();
+  const { confirm } = useFeedback();
 
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [error, setError] = useState("");
@@ -76,9 +78,13 @@ export function ClientPriceModal({ client, onClose }: { client: Client; onClose:
   }
 
   async function remove(entry: ClientPrice) {
-    if (!window.confirm(`Hapus harga ${formatIDR(entry.price)} (berlaku ${formatDate(entry.effectiveFrom)})?`)) {
-      return;
-    }
+    const ok = await confirm({
+      title: "Hapus Harga",
+      message: `Hapus harga ${formatIDR(entry.price)} (berlaku ${formatDate(entry.effectiveFrom)})?`,
+      confirmLabel: "Hapus",
+      destructive: true,
+    });
+    if (!ok) return;
     setError("");
     try {
       await deletePrice.mutateAsync(entry.id);

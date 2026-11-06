@@ -14,8 +14,8 @@ export function InvoiceDocument({
   const client = invoice.clientSnapshot;
 
   return (
-    <div className="invoice-doc mx-auto w-full max-w-3xl bg-white p-8 text-slate-800 sm:p-10">
-      <div className="flex flex-col justify-between gap-6 sm:flex-row">
+    <div className="invoice-doc mx-auto w-full max-w-3xl bg-white px-5 py-6 text-slate-800 sm:p-10">
+      <div className="doc-block flex flex-col justify-between gap-6 sm:flex-row">
         <div className="flex items-start gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -96,40 +96,65 @@ export function InvoiceDocument({
         </div>
       </div>
 
-      <table className="mt-8 w-full border-collapse text-sm">
-        <thead>
-          <tr className="border-b-2 border-slate-300 text-left text-[11px] uppercase tracking-wide text-slate-500">
-            <th className="py-2 pr-2 font-semibold">Deskripsi</th>
-            <th className="py-2 px-2 text-right font-semibold">Qty</th>
-            <th className="py-2 px-2 text-left font-semibold">Satuan</th>
-            <th className="py-2 px-2 text-right font-semibold">Harga</th>
-            <th className="py-2 px-2 text-right font-semibold">Diskon</th>
-            <th className="py-2 pl-2 text-right font-semibold">Jumlah</th>
-          </tr>
-        </thead>
-        <tbody>
-          {invoice.items.map((item) => (
-            <tr key={item.id} className="border-b border-slate-100 align-top">
-              <td className="py-2 pr-2 text-slate-800">{item.description}</td>
-              <td className="py-2 px-2 text-right tabular-nums text-slate-700">
-                {formatNumber(item.quantity)}
-              </td>
-              <td className="py-2 px-2 text-slate-600">{item.unit}</td>
-              <td className="py-2 px-2 text-right tabular-nums text-slate-700">
-                {formatIDR(item.unitPrice)}
-              </td>
-              <td className="py-2 px-2 text-right tabular-nums text-slate-600">
-                {item.discountPercent > 0
-                  ? `${formatNumber(item.discountPercent)}% (-${formatIDR(lineDiscountValue(item))})`
-                  : "-"}
-              </td>
-              <td className="py-2 pl-2 text-right font-medium tabular-nums text-slate-900">
-                {formatIDR(lineTotal(item))}
-              </td>
+      <div className="invoice-items-table mt-8 hidden sm:block">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-b-2 border-slate-300 text-left text-[11px] uppercase tracking-wide text-slate-500">
+              <th className="py-2 pr-2 font-semibold">Deskripsi</th>
+              <th className="py-2 px-2 text-right font-semibold">Qty</th>
+              <th className="py-2 px-2 text-left font-semibold">Satuan</th>
+              <th className="py-2 px-2 text-right font-semibold">Harga</th>
+              <th className="py-2 px-2 text-right font-semibold">Diskon</th>
+              <th className="py-2 pl-2 text-right font-semibold">Jumlah</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {invoice.items.map((item) => (
+              <tr key={item.id} className="border-b border-slate-100 align-top">
+                <td className="py-2 pr-2 text-slate-800">{item.description}</td>
+                <td className="py-2 px-2 text-right tabular-nums text-slate-700">
+                  {formatNumber(item.quantity)}
+                </td>
+                <td className="py-2 px-2 text-slate-600">{item.unit}</td>
+                <td className="py-2 px-2 text-right tabular-nums text-slate-700">
+                  {formatIDR(item.unitPrice)}
+                </td>
+                <td className="py-2 px-2 text-right tabular-nums text-slate-600">
+                  {item.discountPercent > 0
+                    ? `${formatNumber(item.discountPercent)}% (-${formatIDR(lineDiscountValue(item))})`
+                    : "-"}
+                </td>
+                <td className="py-2 pl-2 text-right font-medium tabular-nums text-slate-900">
+                  {formatIDR(lineTotal(item))}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <ul className="invoice-items-mobile mt-6 space-y-3 sm:hidden">
+        {invoice.items.map((item) => (
+          <li key={item.id} className="doc-block rounded-lg border border-slate-200 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-medium text-slate-800">{item.description}</p>
+              <p className="shrink-0 text-sm font-semibold tabular-nums text-slate-900">
+                {formatIDR(lineTotal(item))}
+              </p>
+            </div>
+            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-600">
+              <span className="tabular-nums">
+                {formatNumber(item.quantity)} {item.unit} × {formatIDR(item.unitPrice)}
+              </span>
+              {item.discountPercent > 0 ? (
+                <span className="tabular-nums text-slate-500">
+                  Diskon {formatNumber(item.discountPercent)}% (-{formatIDR(lineDiscountValue(item))})
+                </span>
+              ) : null}
+            </div>
+          </li>
+        ))}
+      </ul>
 
       <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:justify-between">
         <div className="max-w-xs text-xs text-slate-500">
@@ -147,7 +172,7 @@ export function InvoiceDocument({
           ) : null}
         </div>
 
-        <div className="ml-auto w-full max-w-xs space-y-1.5 text-sm">
+        <div className="totals-block ml-auto w-full max-w-xs space-y-1.5 text-sm">
           <div className="flex justify-between text-slate-600">
             <span>Subtotal</span>
             <span className="tabular-nums text-slate-800">{formatIDR(totals.subtotal)}</span>

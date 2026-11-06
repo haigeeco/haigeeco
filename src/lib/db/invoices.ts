@@ -28,6 +28,22 @@ export function useInvoices() {
   });
 }
 
+export function useInvoice(id: string) {
+  return useQuery({
+    queryKey: [...KEY, id],
+    enabled: Boolean(id),
+    queryFn: async (): Promise<Invoice | null> => {
+      const { data, error } = await getSupabase()
+        .from("invoices")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      return data ? toInvoice(data as InvoiceRow) : null;
+    },
+  });
+}
+
 export function useNextInvoiceNumber(prefix: string | undefined) {
   return useQuery({
     queryKey: ["invoice-number", prefix],

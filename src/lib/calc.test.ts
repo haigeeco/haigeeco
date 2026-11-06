@@ -25,6 +25,10 @@ describe("lineTotal", () => {
     expect(lineDiscountValue(line)).toBe(10_000);
     expect(lineTotal(line)).toBe(90_000);
   });
+
+  it("membulatkan total baris ke rupiah bulat", () => {
+    expect(lineTotal(item({ quantity: 1.5, unitPrice: 999 }))).toBe(1_499);
+  });
 });
 
 describe("computeTotals", () => {
@@ -117,5 +121,18 @@ describe("computeTotals", () => {
     for (const value of Object.values(totals)) {
       expect(Number.isInteger(value)).toBe(true);
     }
+  });
+
+  it("jumlah baris yang dibulatkan sama dengan subtotal", () => {
+    const line = item({ quantity: 1.5, unitPrice: 999 });
+    const totals = computeTotals({
+      items: [line, line],
+      discount: 0,
+      shippingCost: 0,
+      taxEnabled: false,
+      taxRate: 0,
+      downPayment: 0,
+    });
+    expect(lineTotal(line) * 2).toBe(totals.subtotal);
   });
 });

@@ -13,21 +13,21 @@ export interface InvoiceTotals {
   amountDue: number;
 }
 
+// Rupiah tidak punya pecahan: bulatkan di titik perhitungan, bukan hanya saat render,
+// supaya baris + subtotal + pajak selalu sama dengan yang tercetak.
+const rupiah = (value: number): number => Math.round(value);
+
 function lineGross(item: InvoiceItem): number {
   return (item.quantity || 0) * (item.unitPrice || 0);
 }
 
 export function lineDiscountValue(item: InvoiceItem): number {
-  return lineGross(item) * ((item.discountPercent || 0) / 100);
+  return rupiah(lineGross(item) * ((item.discountPercent || 0) / 100));
 }
 
 export function lineTotal(item: InvoiceItem): number {
-  return lineGross(item) - lineDiscountValue(item);
+  return rupiah(lineGross(item) - lineDiscountValue(item));
 }
-
-// Rupiah tidak punya pecahan: bulatkan di titik perhitungan, bukan hanya saat render,
-// supaya subtotal + pajak selalu sama dengan total yang tercetak.
-const rupiah = (value: number): number => Math.round(value);
 
 export function computeTotals(
   invoice: Pick<

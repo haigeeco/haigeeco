@@ -7,7 +7,7 @@ import { Card, LinkButton, PageHeader } from "@/components/ui";
 import { useClients } from "@/lib/db/clients";
 import { useProducts } from "@/lib/db/products";
 import { useSettings } from "@/lib/db/settings";
-import { useInvoices } from "@/lib/db/invoices";
+import { useInvoice } from "@/lib/db/invoices";
 
 function EditInvoiceInner() {
   const params = useSearchParams();
@@ -15,22 +15,22 @@ function EditInvoiceInner() {
   const settingsQuery = useSettings();
   const clientsQuery = useClients();
   const productsQuery = useProducts();
-  const invoicesQuery = useInvoices();
+  const invoiceQuery = useInvoice(id);
 
   const loading =
     settingsQuery.isLoading ||
     clientsQuery.isLoading ||
     productsQuery.isLoading ||
-    invoicesQuery.isLoading;
+    invoiceQuery.isLoading;
 
   if (loading) {
     return <Card className="p-6 text-sm text-slate-400">Memuat data…</Card>;
   }
-  if (settingsQuery.isError || invoicesQuery.isError) {
+  if (settingsQuery.isError || invoiceQuery.isError) {
     return <Card className="p-6 text-sm text-rose-600">Gagal memuat data. Coba muat ulang.</Card>;
   }
 
-  const invoice = (invoicesQuery.data ?? []).find((item) => item.id === id);
+  const invoice = invoiceQuery.data ?? undefined;
   const settings = settingsQuery.data;
 
   if (!invoice || !settings) {

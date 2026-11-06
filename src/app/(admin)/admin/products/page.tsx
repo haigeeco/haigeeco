@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { Product } from "@/lib/types";
 import { newId, nowIso } from "@/lib/ids";
 import { useProducts, useUpsertProduct, useDeleteProduct } from "@/lib/db/products";
+import { ResponsiveTable } from "@/components/ResponsiveTable";
+import { useFeedback } from "@/components/feedback";
 import { formatIDR } from "@/lib/format";
 import {
   Button,
@@ -35,6 +37,7 @@ export default function ProductsPage() {
   const productsQuery = useProducts();
   const upsertProduct = useUpsertProduct();
   const deleteProduct = useDeleteProduct();
+  const { confirm, notify } = useFeedback();
   const products = productsQuery.data ?? [];
 
   const [editing, setEditing] = useState<Product | null>(null);
@@ -72,11 +75,20 @@ export default function ProductsPage() {
   }
 
   async function remove(product: Product) {
-    if (!window.confirm(`Hapus produk "${product.name}"? Invoice lama tetap tersimpan.`)) return;
+    const ok = await confirm({
+      title: "Hapus Produk",
+      message: `Hapus produk "${product.name}"? Invoice lama tetap tersimpan.`,
+      confirmLabel: "Hapus",
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deleteProduct.mutateAsync(product.id);
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Gagal menghapus produk.");
+      notify({
+        title: "Gagal menghapus",
+        message: err instanceof Error ? err.message : "Gagal menghapus produk.",
+      });
     }
   }
 
@@ -100,60 +112,94 @@ export default function ProductsPage() {
         />
       ) : (
         <Card>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-                  <th className="px-4 py-3 font-semibold">Nama</th>
-                  <th className="px-4 py-3 font-semibold">SKU</th>
-                  <th className="px-4 py-3 font-semibold">Satuan</th>
-                  <th className="px-4 py-3 text-right font-semibold">Harga</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 text-right font-semibold">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-slate-800">{product.name}</p>
-                      {product.description ? (
-                        <p className="text-xs text-slate-500">{product.description}</p>
-                      ) : null}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-500">
-                      {product.sku || "-"}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">{product.unit}</td>
-                    <td className="px-4 py-3 text-right tabular-nums text-slate-800">
-                      {formatIDR(product.price)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={
-                          product.active
-                            ? "inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700"
-                            : "inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500"
-                        }
-                      >
-                        {product.active ? "Aktif" : "Nonaktif"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" onClick={() => openEdit(product)}>
-                          Edit
-                        </Button>
-                        <Button variant="ghost" onClick={() => remove(product)}>
-                          Hapus
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ResponsiveTable
+            items={products}
+            getKey={(product) => product.id}
+            head={
+              <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+                <th className="px-4 py-3 font-semibold">Nama</th>
+                <th className="px-4 py-3 font-semibold">SKU</th>
+                <th className="px-4 py-3 font-semibold">Satuan</th>
+                <th className="px-4 py-3 text-right font-semibold">Harga</th>
+                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 text-right font-semibold">Aksi</th>
+              </tr>
+            }
+            renderCard={(product) => (
+              <>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-slate-800">{product.name}</p>
+                    {product.description ? (
+                      <p className="text-xs text-slate-500">{product.description}</p>
+                    ) : null}
+                  </div>
+                  <span
+                    className={
+                      product.active
+                        ? "shrink-0 inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700"
+                        : "shrink-0 inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500"
+                    }
+                  >
+                    {product.active ? "Aktif" : "Nonaktif"}
+                  </span>
+                </div>
+                <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-slate-500">
+                  {product.sku ? <span className="font-mono">{product.sku}</span> : null}
+                  <span>{product.unit}</span>
+                  <span className="font-medium tabular-nums text-slate-700">
+                    {formatIDR(product.price)}
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-1">
+                  <Button variant="ghost" onClick={() => openEdit(product)}>
+                    Edit
+                  </Button>
+                  <Button variant="ghost" onClick={() => remove(product)}>
+                    Hapus
+                  </Button>
+                </div>
+              </>
+            )}
+            renderRow={(product) => (
+              <tr key={product.id} className="border-b border-slate-100 hover:bg-slate-50">
+                <td className="px-4 py-3">
+                  <p className="font-medium text-slate-800">{product.name}</p>
+                  {product.description ? (
+                    <p className="text-xs text-slate-500">{product.description}</p>
+                  ) : null}
+                </td>
+                <td className="px-4 py-3 font-mono text-xs text-slate-500">
+                  {product.sku || "-"}
+                </td>
+                <td className="px-4 py-3 text-slate-600">{product.unit}</td>
+                <td className="px-4 py-3 text-right tabular-nums text-slate-800">
+                  {formatIDR(product.price)}
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={
+                      product.active
+                        ? "inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700"
+                        : "inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500"
+                    }
+                  >
+                    {product.active ? "Aktif" : "Nonaktif"}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button variant="ghost" onClick={() => openEdit(product)}>
+                      Edit
+                    </Button>
+                    <Button variant="ghost" onClick={() => remove(product)}>
+                      Hapus
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            )}
+          />
         </Card>
       )}
 

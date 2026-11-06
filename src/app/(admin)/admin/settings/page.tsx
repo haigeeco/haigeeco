@@ -9,6 +9,7 @@ import { useInvoices } from "@/lib/db/invoices";
 import { useLoadSampleData } from "@/lib/db/sample";
 import { uploadPublicAsset } from "@/lib/db/storage";
 import { DEFAULT_LOGO_URL } from "@/lib/domain";
+import { useFeedback } from "@/components/feedback";
 import {
   Button,
   Card,
@@ -233,12 +234,18 @@ function DataSection() {
   const productsQuery = useProducts();
   const invoicesQuery = useInvoices();
   const loadSample = useLoadSampleData();
+  const { confirm } = useFeedback();
   const [message, setMessage] = useState("");
 
   const hasData = (clientsQuery.data?.length ?? 0) > 0 || (productsQuery.data?.length ?? 0) > 0;
 
   async function handleSample() {
-    if (!window.confirm("Tambahkan data contoh (3 klien + 5 produk)?")) return;
+    const ok = await confirm({
+      title: "Muat Data Contoh",
+      message: "Tambahkan data contoh (3 klien + 5 produk)?",
+      confirmLabel: "Tambahkan",
+    });
+    if (!ok) return;
     setMessage("");
     try {
       await loadSample.mutateAsync();

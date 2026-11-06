@@ -255,7 +255,7 @@ export function InvoiceForm({
             />
             {!invoice ? (
               <span className="mt-1 block text-[11px] text-slate-400">
-                Dibuat otomatis saat disimpan
+                Perkiraan nomor — nomor pasti dibuat otomatis saat disimpan.
               </span>
             ) : null}
           </Field>

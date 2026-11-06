@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { DEFAULT_LOGO_URL } from "@/lib/domain";
+import { Input } from "@/components/ui";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -62,13 +63,12 @@ export default function LoginPage() {
               <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="email">
                 Email
               </label>
-              <input
+              <Input
                 id="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
                 placeholder="nama@geeco.id"
               />
             </div>
@@ -77,14 +77,13 @@ export default function LoginPage() {
               <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="password">
                 Kata sandi
               </label>
-              <input
+              <Input
                 id="password"
                 type="password"
                 required
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
                 placeholder="••••••••"
               />
             </div>

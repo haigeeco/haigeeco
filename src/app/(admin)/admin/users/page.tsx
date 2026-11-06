@@ -12,6 +12,8 @@ import {
   useUpdateProfile,
 } from "@/lib/db/users";
 import { Button, Card, EmptyState, Field, Input, Modal, PageHeader, Select } from "@/components/ui";
+import { ResponsiveTable } from "@/components/ResponsiveTable";
+import { useFeedback } from "@/components/feedback";
 
 const CREATE_ROLES: Array<{ value: AppRole; label: string }> = [
   { value: "staff_finance", label: "Staff Finance" },
@@ -53,6 +55,7 @@ export default function AdminUsersPage() {
   const createUser = useCreateUser();
   const updateProfile = useUpdateProfile();
   const deleteUser = useDeleteUser();
+  const { confirm, notify } = useFeedback();
 
   const me = meQuery.data ?? null;
 
@@ -124,11 +127,20 @@ export default function AdminUsersPage() {
 
   async function remove(profile: Profile) {
     const label = profile.full_name || profile.email || "pengguna ini";
-    if (!window.confirm(`Hapus akun "${label}"? Tindakan ini permanen.`)) return;
+    const ok = await confirm({
+      title: "Hapus Akun",
+      message: `Hapus akun "${label}"? Tindakan ini permanen.`,
+      confirmLabel: "Hapus",
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deleteUser.mutateAsync(profile.id);
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Gagal menghapus akun.");
+      notify({
+        title: "Gagal menghapus",
+        message: err instanceof Error ? err.message : "Gagal menghapus akun.",
+      });
     }
   }
 
@@ -176,57 +188,92 @@ export default function AdminUsersPage() {
         />
       ) : (
         <Card>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-                  <th className="px-4 py-3 font-semibold">Nama</th>
-                  <th className="px-4 py-3 font-semibold">Email</th>
-                  <th className="px-4 py-3 font-semibold">Peran</th>
-                  <th className="px-4 py-3 font-semibold">Bergabung</th>
-                  <th className="px-4 py-3 text-right font-semibold">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {profiles.map((profile) => {
-                  const isSelf = profile.id === me?.id;
-                  return (
-                    <tr key={profile.id} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="px-4 py-3">
-                        <span className="font-medium text-slate-800">
-                          {profile.full_name || "(tanpa nama)"}
-                        </span>
+          <ResponsiveTable
+            items={profiles}
+            getKey={(profile) => profile.id}
+            minWidth="min-w-[720px]"
+            head={
+              <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+                <th className="px-4 py-3 font-semibold">Nama</th>
+                <th className="px-4 py-3 font-semibold">Email</th>
+                <th className="px-4 py-3 font-semibold">Peran</th>
+                <th className="px-4 py-3 font-semibold">Bergabung</th>
+                <th className="px-4 py-3 text-right font-semibold">Aksi</th>
+              </tr>
+            }
+            renderCard={(profile) => {
+              const isSelf = profile.id === me?.id;
+              return (
+                <>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-slate-800">
+                        {profile.full_name || "(tanpa nama)"}
                         {isSelf ? (
                           <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">
                             Anda
                           </span>
                         ) : null}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600">{profile.email || "-"}</td>
-                      <td className="px-4 py-3">
-                        <RoleBadge role={profile.role} />
-                      </td>
-                      <td className="px-4 py-3 text-slate-500">{formatDate(profile.created_at)}</td>
-                      <td className="px-4 py-3 text-right">
-                        {isSelf ? (
-                          <span className="text-xs text-slate-400">—</span>
-                        ) : (
-                          <div className="flex justify-end gap-1">
-                            <Button variant="ghost" onClick={() => openEdit(profile)}>
-                              Edit
-                            </Button>
-                            <Button variant="ghost" onClick={() => remove(profile)}>
-                              Hapus
-                            </Button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-slate-500">
+                        {profile.email || "-"}
+                      </p>
+                    </div>
+                    <RoleBadge role={profile.role} />
+                  </div>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Bergabung {formatDate(profile.created_at)}
+                  </p>
+                  {isSelf ? null : (
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      <Button variant="ghost" onClick={() => openEdit(profile)}>
+                        Edit
+                      </Button>
+                      <Button variant="ghost" onClick={() => remove(profile)}>
+                        Hapus
+                      </Button>
+                    </div>
+                  )}
+                </>
+              );
+            }}
+            renderRow={(profile) => {
+              const isSelf = profile.id === me?.id;
+              return (
+                <tr key={profile.id} className="border-b border-slate-100 hover:bg-slate-50">
+                  <td className="px-4 py-3">
+                    <span className="font-medium text-slate-800">
+                      {profile.full_name || "(tanpa nama)"}
+                    </span>
+                    {isSelf ? (
+                      <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+                        Anda
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">{profile.email || "-"}</td>
+                  <td className="px-4 py-3">
+                    <RoleBadge role={profile.role} />
+                  </td>
+                  <td className="px-4 py-3 text-slate-500">{formatDate(profile.created_at)}</td>
+                  <td className="px-4 py-3 text-right">
+                    {isSelf ? (
+                      <span className="text-xs text-slate-400">—</span>
+                    ) : (
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" onClick={() => openEdit(profile)}>
+                          Edit
+                        </Button>
+                        <Button variant="ghost" onClick={() => remove(profile)}>
+                          Hapus
+                        </Button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              );
+            }}
+          />
         </Card>
       )}
 
