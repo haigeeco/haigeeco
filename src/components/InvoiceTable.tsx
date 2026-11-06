@@ -29,11 +29,13 @@ export function InvoiceTable({ invoices }: { invoices: Invoice[] }) {
             <div className="flex items-start justify-between gap-3">
               <Link
                 href={`/admin/invoices/view?id=${invoice.id}`}
-                className="font-mono text-xs font-medium text-indigo-600 hover:underline"
+                className="min-w-0 break-all font-mono text-xs font-medium text-indigo-600 hover:underline"
               >
                 {invoice.number}
               </Link>
-              <StatusBadge invoice={invoice} />
+              <span className="shrink-0">
+                <StatusBadge invoice={invoice} />
+              </span>
             </div>
             <p className="mt-1 truncate text-sm font-medium text-slate-800">
               {invoice.clientSnapshot.name}

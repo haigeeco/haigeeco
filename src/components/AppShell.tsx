@@ -84,15 +84,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   const brand = (
-    <div className="flex items-center gap-3">
+    <div className="flex min-w-0 items-center gap-3">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={settings.logoUrl || DEFAULT_LOGO_URL}
         alt=""
-        className="h-9 w-9 rounded-lg object-contain"
+        className="h-9 w-9 shrink-0 rounded-lg object-contain"
       />
-      <div className="leading-tight">
-        <p className="text-sm font-semibold text-slate-900">{settings.name || "Gee Co."}</p>
+      <div className="min-w-0 leading-tight">
+        <p className="truncate text-sm font-semibold text-slate-900">{settings.name || "Gee Co."}</p>
         <p className="text-[11px] text-slate-500">Invoice Manager</p>
       </div>
     </div>
@@ -100,7 +100,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-slate-200 bg-white px-4 py-5 md:flex">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col overflow-hidden border-r border-slate-200 bg-white px-4 py-5 md:flex">
         {brand}
         <nav className="mt-8 flex flex-1 flex-col gap-1">
           {nav.map((item) => {

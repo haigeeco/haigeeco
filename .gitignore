@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# state lokal Supabase CLI (dibuat oleh `supabase link`/deploy) — jangan di-commit
+/supabase/.temp/
+
 # kredensial lokal — JANGAN pernah di-commit/di-push
 /user-and-password.md
 

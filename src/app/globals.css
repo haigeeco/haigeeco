@@ -90,7 +90,16 @@ body {
 
 .article-body :where(img) {
   margin-top: 1rem;
+  max-width: 100%;
+  height: auto;
   border-radius: 0.5rem;
+}
+
+.article-body :where(table) {
+  display: block;
+  max-width: 100%;
+  margin-top: 1rem;
+  overflow-x: auto;
 }
 
 @media print {

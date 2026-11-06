@@ -142,7 +142,7 @@ export function ClientPriceModal({ client, onClose }: { client: Client; onClose:
                 </p>
 
                 <div className="mt-2 flex flex-wrap items-end gap-2">
-                  <Field label="Harga" className="w-32">
+                  <Field label="Harga" className="w-full sm:w-32">
                     <Input
                       type="number"
                       min={0}
@@ -152,7 +152,7 @@ export function ClientPriceModal({ client, onClose }: { client: Client; onClose:
                       placeholder={String(current ?? product.price)}
                     />
                   </Field>
-                  <Field label="Berlaku mulai" className="w-44">
+                  <Field label="Berlaku mulai" className="w-full sm:w-44">
                     <Input
                       type="date"
                       value={draft.date}
@@ -163,6 +163,7 @@ export function ClientPriceModal({ client, onClose }: { client: Client; onClose:
                     type="button"
                     onClick={() => save(product.id)}
                     disabled={savePrice.isPending}
+                    className="w-full sm:w-auto"
                   >
                     Simpan
                   </Button>

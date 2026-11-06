@@ -14,7 +14,7 @@ export function InvoiceDocument({
   const client = invoice.clientSnapshot;
 
   return (
-    <div className="invoice-doc mx-auto w-full max-w-3xl bg-white px-5 py-6 text-slate-800 sm:p-10">
+    <div className="invoice-doc mx-auto w-full max-w-3xl break-words bg-white px-5 py-6 text-slate-800 sm:p-10">
       <div className="doc-block flex flex-col justify-between gap-6 sm:flex-row">
         <div className="flex items-start gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
