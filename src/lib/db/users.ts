@@ -19,7 +19,7 @@ export function useCurrentProfile() {
       if (!user) return null;
       const { data, error } = await getSupabase()
         .from("profiles")
-        .select("id,full_name,email,role,created_at")
+        .select("id,full_name,email,username,role,created_at")
         .eq("id", user.id)
         .maybeSingle();
       if (error) throw error;
@@ -31,6 +31,7 @@ export function useCurrentProfile() {
           id: user.id,
           full_name: user.user_metadata?.full_name ?? user.email ?? null,
           email: user.email ?? null,
+          username: null,
           role: null,
           created_at: "",
         }
@@ -45,7 +46,7 @@ export function useProfiles() {
     queryFn: async (): Promise<Profile[]> => {
       const { data, error } = await getSupabase()
         .from("profiles")
-        .select("id,full_name,email,role,created_at")
+        .select("id,full_name,email,username,role,created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Profile[];
@@ -59,15 +60,17 @@ export function useUpdateProfile() {
     mutationFn: async ({
       id,
       full_name,
+      username,
       role,
     }: {
       id: string;
       full_name: string;
+      username: string;
       role: AppRole | null;
     }) => {
       const { error } = await getSupabase()
         .from("profiles")
-        .update({ full_name, role })
+        .update({ full_name, username: username || null, role })
         .eq("id", id);
       if (error) throw error;
     },
@@ -100,6 +103,7 @@ export function useCreateUser() {
       email: string;
       password: string;
       full_name: string;
+      username: string;
       role: AppRole;
     }) => {
       const { data, error } = await getSupabase().functions.invoke("admin-users", {

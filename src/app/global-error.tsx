@@ -17,13 +17,13 @@ export default function GlobalError({ error, retry }: { error: unknown; retry: (
           alignItems: "center",
           justifyContent: "center",
           fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
-          background: "#f8fafc",
-          color: "#0f172a",
+          background: "#fffaf3",
+          color: "#2a211c",
         }}
       >
         <div style={{ maxWidth: 420, padding: "0 24px", textAlign: "center" }}>
           <h1 style={{ fontSize: 20, fontWeight: 600 }}>Terjadi kesalahan</h1>
-          <p style={{ marginTop: 8, fontSize: 14, color: "#475569" }}>
+          <p style={{ marginTop: 8, fontSize: 14, color: "#6b5e54" }}>
             Aplikasi gagal dimuat. Coba muat ulang halaman.
           </p>
           <button
@@ -31,8 +31,8 @@ export default function GlobalError({ error, retry }: { error: unknown; retry: (
             style={{
               marginTop: 20,
               border: 0,
-              borderRadius: 8,
-              background: "#4f46e5",
+              borderRadius: 9999,
+              background: "#e76f51",
               color: "#ffffff",
               padding: "10px 16px",
               fontSize: 14,

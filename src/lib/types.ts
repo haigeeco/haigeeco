@@ -39,8 +39,15 @@ export interface Product {
   sku: string;
   name: string;
   description: string;
+  category: string;
   unit: string;
+  /** Harga B2B / kolaborasi. Tidak pernah ditampilkan di situs publik. */
   price: number;
+  /** Harga end-user / customer yang tampil di situs publik. */
+  customerPrice: number;
+  imageUrl: string;
+  websiteVisible: boolean;
+  sortOrder: number;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -106,6 +113,7 @@ export interface Profile {
   id: string;
   full_name: string | null;
   email: string | null;
+  username: string | null;
   role: AppRole | null;
   created_at: string;
 }

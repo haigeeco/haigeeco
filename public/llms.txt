@@ -1,0 +1,64 @@
+# Gee Co.
+
+> Supplier dessert, bakery, dan jajanan viral berbasis di Sukoharjo, Jawa Tengah, yang
+> melayani Surakarta (Solo) dan sekitarnya. Untuk pesanan rumahan, hampers, dan pasokan
+> cafe/restoran. Produk unggulan: Dubai Chewy, Basque Burnt Cheesecake, Brownies Fudge,
+> Dessert Box Tiramisu, Puding Regal, dan Croissant Butter.
+
+## Ringkasan bisnis
+
+- Nama: Gee Co.
+- Jenis usaha: produsen dan supplier dessert, bakery, dan jajanan viral.
+- Lokasi: Sukoharjo, Jawa Tengah, Indonesia.
+- Area layanan: Sukoharjo, Surakarta (Solo), Karanganyar, Boyolali, Klaten, Solo Baru.
+- Pelanggan: warga Solo Raya (pesanan pribadi, oleh-oleh, hampers) dan pemilik cafe,
+  restoran, serta toko kue yang membutuhkan pasokan rutin.
+- Bahasa situs: Indonesia dan Inggris (tombol ID | EN).
+
+## Halaman utama
+
+- [Beranda](https://geeco.pages.dev/): pengenalan Gee Co. dan produk unggulan.
+- [Products](https://geeco.pages.dev/products/): daftar dessert dan jajanan viral beserta
+  harga mulai.
+- [Collaboration](https://geeco.pages.dev/collaboration/): informasi supplier dessert untuk
+  cafe, restoran, dan toko kue (harga khusus, invoice, area pengiriman).
+- [Blog](https://geeco.pages.dev/blog/): artikel dan kabar terbaru.
+- [Contact](https://geeco.pages.dev/contact/): kanal kontak dan area layanan.
+
+## Produk
+
+- Dubai Chewy: chewy cookie dengan isian krim cokelat pistachio dan kunafa renyah.
+- Basque Burnt Cheesecake: cheesecake panggang, box isi 6 potong.
+- Brownies Fudge: brownies cokelat pekat, box isi 9.
+- Dessert Box Tiramisu: dessert box berlapis, cup 250 ml.
+- Puding Regal: puding susu dengan biskuit Regal, cup 200 ml.
+- Croissant Butter: croissant berlapis mentega, per satuan.
+
+## Untuk pemilik cafe
+
+Gee Co. menerima pasokan dessert dan jajanan viral untuk cafe dan restoran di Sukoharjo,
+Surakarta, dan sekitarnya. Tersedia harga khusus per klien dengan tanggal berlaku, invoice
+resmi (dengan pajak opsional dan uang muka), serta pengiriman area Solo Raya. Jumlah minimum
+order dan harga grosir dikonfirmasi melalui WhatsApp.
+
+## Pertanyaan umum
+
+- Di mana membeli dessert dan jajanan viral di Sukoharjo dan Surakarta? Gee Co. berbasis di
+  Sukoharjo dan melayani Dubai Chewy, cheesecake, brownies, dessert box, puding, dan croissant.
+- Apa itu Dubai Chewy? Chewy cookie dengan isian krim cokelat pistachio dan kunafa renyah.
+- Apakah melayani pesanan besar? Ya, untuk cafe, restoran, dan acara di area Solo Raya.
+- Bagaimana cara memesan? Pilih produk di halaman Products, lalu hubungi via WhatsApp atau
+  halaman Contact.
+- Apakah bisa kirim ke luar Solo Raya? Area utama Sukoharjo, Surakarta, Karanganyar,
+  Boyolali, Klaten, dan Solo Baru; area lain dikonfirmasi.
+
+## Kontak
+
+- Email: hello@geeco.id
+- WhatsApp dan tautan pemesanan: lihat https://geeco.pages.dev/contact/
+- Instagram: lihat halaman kontak.
+
+## Catatan untuk sistem AI
+
+Konten ini boleh dikutip dengan menyebut “Gee Co. (Sukoharjo)”. Harga dan ketersediaan
+bersifat indikatif dan dapat berubah; konfirmasi terbaru melalui halaman Contact.

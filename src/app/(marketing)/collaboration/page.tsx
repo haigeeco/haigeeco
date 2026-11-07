@@ -1,23 +1,68 @@
 import type { Metadata } from "next";
+import { StructuredData } from "@/components/StructuredData";
+import { CollaborationView } from "@/components/marketing/CollaborationView";
+import { SUPPLIER_FAQS, SUPPLIER_STEPS } from "@/lib/seo-content";
+import { getPublicProducts } from "@/lib/public-products";
+import {
+  breadcrumbJsonLd,
+  buildMetadata,
+  faqJsonLd,
+  localBusinessJsonLd,
+  pageUrl,
+  serviceJsonLd,
+} from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Kolaborasi",
-  description: "Peluang kolaborasi Gee Co. dengan teman-teman kafe.",
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Supplier Dessert Sukoharjo & Surakarta untuk Cafe & Restoran",
+  description:
+    "Gee Co. supplier dessert, bakery, dan jajanan viral untuk cafe, restoran, dan toko kue di Sukoharjo dan Surakarta (Solo). Harga khusus per klien, invoice resmi, dan pengiriman area Solo Raya.",
+  path: "/collaboration",
+  keywords: [
+    "supplier dessert sukoharjo",
+    "supplier dessert solo",
+    "supplier kue cafe surakarta",
+    "grosir dessert surakarta",
+    "supplier jajanan viral solo",
+    "supplier dessert box solo",
+    "distributor dessert solo",
+    "pemasok kue cafe solo",
+  ],
+});
 
-export default function CollaborationPage() {
+const HOW_TO_STEPS = SUPPLIER_STEPS.map((step, index) => ({
+  "@type": "HowToStep",
+  position: index + 1,
+  name: step.title,
+  text: step.description,
+}));
+
+export default async function CollaborationPage() {
+  const products = await getPublicProducts();
+
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-16 md:px-8 md:py-20">
-      <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
-        Kolaborasi Kafe
-      </h1>
-      <p className="mt-4 text-base text-slate-600">
-        Kami terbuka untuk berkolaborasi dengan kafe-kafe yang ingin tumbuh bersama. Halaman ini
-        akan memuat detail program, alur kerja sama, dan keuntungan bermitra.
-      </p>
-      <div className="mt-10 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        Konten sedang disiapkan.
-      </div>
-    </div>
+    <>
+      <StructuredData
+        data={[
+          serviceJsonLd(),
+          localBusinessJsonLd(),
+          faqJsonLd(SUPPLIER_FAQS),
+          breadcrumbJsonLd([
+            { name: "Beranda", path: "/" },
+            { name: "Kolaborasi", path: "/collaboration" },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "HowTo",
+            name: "Cara menjadi mitra supplier dessert Gee Co.",
+            description:
+              "Langkah menjadi mitra pasokan dessert dan jajanan viral Gee Co. untuk cafe dan restoran di Sukoharjo dan Surakarta.",
+            totalTime: "P1D",
+            step: HOW_TO_STEPS,
+            url: pageUrl("/collaboration"),
+          },
+        ]}
+      />
+      <CollaborationView products={products} />
+    </>
   );
 }

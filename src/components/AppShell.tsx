@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CONTENT_ROLES, FINANCE_ROLES, SUPERUSER_ONLY, homePathForRole } from "@/lib/access";
 import { useSettings } from "@/lib/db/settings";
 import { roleLabel, useCurrentProfile } from "@/lib/db/users";
@@ -64,6 +64,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const settings = useSettings().data ?? defaultSettings();
   const profile = useCurrentProfile().data ?? null;
   const role = profile?.role ?? null;
+  const [menuOpen, setMenuOpen] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   const section = NAV.find((item) => isActive(pathname, item.href));
   const allowed = !section || (role !== null && section.roles.includes(role));
@@ -71,6 +73,25 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!allowed) router.replace(homePathForRole(role));
   }, [allowed, role, router]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    closeRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [menuOpen]);
 
   if (pathname.includes("/invoices/print")) {
     return <>{children}</>;
@@ -92,28 +113,31 @@ export function AppShell({ children }: { children: ReactNode }) {
         className="h-9 w-9 shrink-0 rounded-lg object-contain"
       />
       <div className="min-w-0 leading-tight">
-        <p className="truncate text-sm font-semibold text-slate-900">{settings.name || "Gee Co."}</p>
-        <p className="text-[11px] text-slate-500">Invoice Manager</p>
+        <p className="truncate font-display text-sm font-semibold text-ink">
+          {settings.name || "Gee Co."}
+        </p>
+        <p className="text-[11px] text-ink-soft">{section?.label ?? "Invoice Manager"}</p>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col overflow-hidden border-r border-slate-200 bg-white px-4 py-5 md:flex">
+    <div className="min-h-screen bg-cream">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col overflow-hidden border-r border-line bg-white px-4 py-5 md:flex">
         {brand}
-        <nav className="mt-8 flex flex-1 flex-col gap-1">
+        <nav className="mt-8 flex flex-1 flex-col gap-1" aria-label="Navigasi admin">
           {nav.map((item) => {
             const active = isActive(pathname, item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition",
                   active
-                    ? "bg-indigo-50 text-indigo-700"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    ? "bg-pistachio-soft text-pistachio-dark"
+                    : "text-ink-soft hover:bg-cream-deep hover:text-ink"
                 )}
               >
                 <Icon name={item.icon} className="h-5 w-5" />
@@ -122,14 +146,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        <div className="mt-6 border-t border-slate-200 pt-4">
-          <p className="truncate text-sm font-medium text-slate-800">
+        <div className="mt-6 border-t border-line pt-4">
+          <p className="truncate text-sm font-medium text-ink">
             {profile?.full_name || "Pengguna"}
           </p>
-          <p className="text-[11px] text-slate-500">{roleLabel(role)}</p>
+          <p className="truncate text-[11px] text-ink-soft">
+            {profile?.username ? `@${profile.username} · ` : ""}
+            {roleLabel(role)}
+          </p>
           <button
             onClick={signOut}
-            className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
+            className="mt-3 w-full rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink-soft transition hover:bg-cream-deep hover:text-ink"
           >
             Keluar
           </button>
@@ -137,41 +164,122 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="md:pl-64">
-        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/85 backdrop-blur md:hidden">
+        <header className="sticky top-0 z-20 border-b border-line bg-cream/85 backdrop-blur md:hidden">
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             {brand}
             <button
-              onClick={signOut}
-              className="shrink-0 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              aria-expanded={menuOpen}
+              aria-controls="admin-drawer"
+              aria-label="Buka menu admin"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line bg-white/70 text-ink-soft transition hover:bg-white hover:text-ink"
             >
-              Keluar
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.8}
+                strokeLinecap="round"
+                aria-hidden="true"
+                className="h-5 w-5"
+              >
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
             </button>
           </div>
-          <nav className="flex gap-1 overflow-x-auto px-3 pb-2">
-            {nav.map((item) => {
-              const active = isActive(pathname, item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex shrink-0 items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition",
-                    active ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-100"
-                  )}
-                >
-                  <Icon name={item.icon} className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
         </header>
+
+        {menuOpen ? (
+          <div className="fixed inset-0 z-40 md:hidden">
+            <div
+              className="absolute inset-0 bg-ink/40"
+              onClick={() => setMenuOpen(false)}
+              aria-hidden
+            />
+            <aside
+              id="admin-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu admin"
+              className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col bg-white p-4 shadow-xl"
+            >
+              <div className="flex items-start justify-between gap-3">
+                {brand}
+                <button
+                  ref={closeRef}
+                  type="button"
+                  onClick={() => setMenuOpen(false)}
+                  aria-label="Tutup menu"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-soft transition hover:bg-cream-deep hover:text-ink"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.8}
+                    strokeLinecap="round"
+                    aria-hidden="true"
+                    className="h-5 w-5"
+                  >
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              </div>
+
+              <nav
+                className="mt-6 flex flex-1 flex-col gap-1 overflow-y-auto"
+                aria-label="Navigasi admin"
+              >
+                {nav.map((item) => {
+                  const active = isActive(pathname, item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
+                        active
+                          ? "bg-pistachio-soft text-pistachio-dark"
+                          : "text-ink-soft hover:bg-cream-deep hover:text-ink"
+                      )}
+                    >
+                      <Icon name={item.icon} className="h-5 w-5" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <div className="mt-4 border-t border-line pt-4">
+                <p className="truncate text-sm font-medium text-ink">
+                  {profile?.full_name || "Pengguna"}
+                </p>
+                <p className="truncate text-[11px] text-ink-soft">
+                  {profile?.username ? `@${profile.username} · ` : ""}
+                  {roleLabel(role)}
+                </p>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    void signOut();
+                  }}
+                  className="mt-3 w-full rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink-soft transition hover:bg-cream-deep hover:text-ink"
+                >
+                  Keluar
+                </button>
+              </div>
+            </aside>
+          </div>
+        ) : null}
 
         <main className="mx-auto w-full max-w-6xl px-4 py-6 md:px-8 md:py-8">
           {allowed ? (
             children
           ) : (
-            <p className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center text-sm text-slate-500">
+            <p className="rounded-2xl border border-dashed border-line bg-white px-6 py-14 text-center text-sm text-ink-soft">
               Anda tidak punya akses ke halaman ini. Mengalihkan…
             </p>
           )}

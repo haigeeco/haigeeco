@@ -15,3 +15,6 @@ verify_jwt = true
 
 [functions.rebuild-site]
 verify_jwt = true
+
+[functions.login]
+verify_jwt = false

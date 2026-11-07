@@ -8,7 +8,12 @@
 // (verify_jwt default aktif; fungsi tetap memverifikasi peran superuser sendiri.)
 
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { normalizeEmail, validateCreate } from "./validate.ts";
+import {
+  deriveUsername,
+  normalizeEmail,
+  normalizeUsername,
+  validateCreate,
+} from "./validate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -75,27 +80,61 @@ Deno.serve(async (req: Request) => {
     const password = String(payload.password ?? "");
     const fullName = String(payload.full_name ?? "").trim();
     const role = String(payload.role ?? "");
+    let username = normalizeUsername(payload.username);
 
-    const invalid = validateCreate({ email, password, role });
+    const invalid = validateCreate({ email, password, role, username });
     if (invalid) return json({ error: invalid }, 400);
+
+    // Username eksplisit harus unik. Bila kosong, turunkan dari email dan cari
+    // varian yang belum dipakai.
+    if (username) {
+      const { data: taken } = await admin
+        .from("profiles")
+        .select("id")
+        .eq("username", username)
+        .maybeSingle();
+      if (taken) return json({ error: "Username sudah dipakai. Pilih username lain." }, 400);
+    } else {
+      const base = deriveUsername(email);
+      username = base;
+      for (let attempt = 1; attempt <= 50; attempt += 1) {
+        const { data: taken } = await admin
+          .from("profiles")
+          .select("id")
+          .eq("username", username)
+          .maybeSingle();
+        if (!taken) break;
+        username = `${base}${attempt}`;
+      }
+      const { data: stillTaken } = await admin
+        .from("profiles")
+        .select("id")
+        .eq("username", username)
+        .maybeSingle();
+      if (stillTaken) return json({ error: "Tidak bisa membuat username otomatis." }, 400);
+    }
 
     const { data: created, error: createError } = await admin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      user_metadata: { full_name: fullName || email },
+      user_metadata: { full_name: fullName || email, username },
     });
     if (createError || !created.user) {
       return json({ error: createError?.message ?? "Gagal membuat akun." }, 400);
     }
 
-    // Trigger handle_new_user sudah membuat baris profil; tetapkan nama & peran final.
+    // Trigger handle_new_user sudah membuat baris profil; tetapkan nama, username & peran final.
     const { error: profileError } = await admin
       .from("profiles")
-      .upsert({ id: created.user.id, full_name: fullName || email, email, role });
-    if (profileError) return json({ error: profileError.message }, 400);
+      .upsert({ id: created.user.id, full_name: fullName || email, email, username, role });
+    if (profileError) {
+      // Jangan tinggalkan akun auth tanpa profil bila username/kolom bermasalah.
+      await admin.auth.admin.deleteUser(created.user.id);
+      return json({ error: profileError.message }, 400);
+    }
 
-    return json({ id: created.user.id });
+    return json({ id: created.user.id, username });
   }
 
   if (action === "delete") {

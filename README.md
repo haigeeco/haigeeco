@@ -8,11 +8,14 @@ TypeScript + Tailwind CSS v4**, di-*export* statis (`output: 'export'`), dengan 
 ## Fitur
 
 - **Situs publik** — `/`, `/collaboration`, `/contact`, `/blog` + `/blog/[slug]` (prerender saat build/SSG).
-- **Auth & peran** — `/login` (khusus *masuk*; akun dibuat oleh superuser). Tiga peran:
-  `superuser`, `staff_finance`, `editor`.
+- **Auth & peran** — `/login` (khusus *masuk*; akun dibuat oleh superuser) dengan
+  email **atau username**. Tiga peran: `superuser`, `staff_finance`, `editor`.
 - **Invoice** — buat/edit, multi-item, diskon, ongkos kirim, pajak opsional, DP/uang muka,
   status (Draft/Terkirim/Lunas/Batal), nomor otomatis atomik via RPC.
 - **Master klien & produk**, **Pengaturan** perusahaan (logo, rekening, default pajak).
+- **Produk tampil di situs publik** langsung dari menu Produk admin, lengkap dengan foto,
+  kategori, deskripsi, urutan tampil, dan **harga customer**. Harga **B2B/kolaborasi**
+  disimpan terpisah (`products.price`) dan tidak pernah dikirim ke situs publik.
 - **Harga khusus per klien** — tiap klien (cafe) punya daftar harga sendiri, lengkap dengan
   **tanggal berlaku** untuk menyiapkan kenaikan harga. Invoice mengisi harga otomatis sesuai klien
   & tanggal; invoice lama tidak ikut berubah.
@@ -47,16 +50,21 @@ npm run dev                  # http://localhost:3000
 
 1. **Migrasi** — jalankan berurutan di SQL Editor: `supabase/migrations/0001_init.sql`,
    `0002_profiles_email.sql`, `0003_client_prices.sql`, `0004_security_hardening.sql`,
-   `0005_settings_read.sql`, `0006_site_config.sql` (semuanya idempoten, aman diulang).
-2. **Edge Function** — `admin-users` (membuat/menghapus akun) dan `rebuild-site`
-   (memicu rebuild blog):
+   `0005_settings_read.sql`, `0006_site_config.sql`, `0007_products_public.sql`,
+   `0008_usernames.sql` (semuanya idempoten, aman diulang).
+2. **Edge Function** — `admin-users` (membuat/menghapus akun), `login` (masuk dengan
+   email atau username), dan `rebuild-site` (memicu rebuild blog):
 
    ```bash
    supabase login
    supabase link --project-ref <project-ref>
    supabase functions deploy admin-users
+   supabase functions deploy login
    supabase functions deploy rebuild-site
    ```
+
+   `login` memakai `verify_jwt = false` karena dipanggil sebelum ada sesi. Fungsi ini
+   mengubah username menjadi email di server, jadi email tidak pernah bocor ke klien.
 
    Fungsi memakai `service_role` yang tersedia otomatis di runtime; klien tetap hanya memakai
    publishable key.
@@ -95,6 +103,37 @@ Test berada di `src/**/*.test.ts` dan menargetkan fungsi murni (mis. `src/lib/ca
 - **Logo** dipakai di header publik, `/login`, sidebar admin, invoice, dan favicon/ikon tab.
   Default dari `public/img/logo-320.png` (sumber 1254px disimpan di `assets/brand/` agar tidak
   ikut di-deploy); unggahan di `/admin/settings` menimpanya (disimpan di Storage).
+
+## SEO / AEO / GEO
+
+Situs publik dioptimalkan untuk pencarian lokal di Sukoharjo & Surakarta dan untuk dikutip
+mesin jawaban (AI Overviews, ChatGPT, Perplexity):
+
+- **Landing page bertarget intent** — `/products` (Dubai Chewy, dessert, jajanan viral) dan
+  `/collaboration` (supplier dessert untuk cafe, restoran, toko kue; menggabungkan halaman
+  supplier sebelumnya).
+- **Dua bahasa (ID | EN)** lewat tombol di header. Konten inti diterjemahkan di komponen
+  `src/components/marketing/*`; preferensi bahasa disimpan di `localStorage`.
+- **Structured data JSON-LD** di `src/lib/seo.ts`: `Organization`, `WebSite`, `Bakery`
+  (`LocalBusiness`), `Service`, `FAQPage`, `Product`/`ItemList`, `BlogPosting`,
+  `BreadcrumbList`, dan `HowTo`.
+- **Metadata** per halaman (canonical, Open Graph, Twitter Card, keywords) + `metadataBase`.
+- **`app/robots.ts`** mengizinkan crawler mesin pencari dan bot AI (GPTBot, PerplexityBot,
+  ClaudeBot, Google-Extended, dll.) serta memblokir `/admin/` dan `/login`.
+- **`app/sitemap.ts`** menghasilkan `sitemap.xml` (halaman statis + artikel blog terbit).
+- **`public/llms.txt`** merangkum bisnis, produk, area layanan, dan FAQ untuk agen AI.
+- **Konten** produk publik dibaca dari tabel `products` (`website_visible = true`,
+  `active = true`) melalui kolom aman saja. `src/lib/seo-content.ts` tetap menjadi fallback
+  statis bila DB belum siap. Harga B2B (`price`) tidak pernah ikut dibaca.
+
+Variabel lingkungan terkait (lihat `.env.example`): `NEXT_PUBLIC_SITE_URL`,
+`NEXT_PUBLIC_WHATSAPP`, `NEXT_PUBLIC_CONTACT_EMAIL`, `NEXT_PUBLIC_BUSINESS_ADDRESS`,
+`NEXT_PUBLIC_INSTAGRAM_URL`, `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`.
+
+**Langkah manual (butuh akun):** daftarkan bisnis di **Google Business Profile** (kategori
+Bakery/Dessert shop, kota Sukoharjo, jam buka, foto produk) dan verifikasi situs di
+**Google Search Console**, lalu kirim `sitemap.xml`. Untuk hasil terbaik, pastikan NAP
+(nama, alamat, telepon) di situs sama dengan profil Google Business.
 
 ## Data & keamanan
 

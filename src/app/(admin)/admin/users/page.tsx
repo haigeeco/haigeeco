@@ -63,28 +63,50 @@ export default function AdminUsersPage() {
   const [createForm, setCreateForm] = useState({
     full_name: "",
     email: "",
+    username: "",
     password: "",
     role: "staff_finance" as AppRole,
   });
   const [createError, setCreateError] = useState("");
 
   const [editing, setEditing] = useState<Profile | null>(null);
-  const [editForm, setEditForm] = useState<{ full_name: string; role: string }>({
+  const [editForm, setEditForm] = useState<{ full_name: string; username: string; role: string }>({
     full_name: "",
+    username: "",
     role: "",
   });
   const [editError, setEditError] = useState("");
 
   function openCreate() {
-    setCreateForm({ full_name: "", email: "", password: "", role: "staff_finance" });
+    setCreateForm({
+      full_name: "",
+      email: "",
+      username: "",
+      password: "",
+      role: "staff_finance",
+    });
     setCreateError("");
     setCreating(true);
   }
 
   function openEdit(profile: Profile) {
-    setEditForm({ full_name: profile.full_name ?? "", role: profile.role ?? "" });
+    setEditForm({
+      full_name: profile.full_name ?? "",
+      username: profile.username ?? "",
+      role: profile.role ?? "",
+    });
     setEditError("");
     setEditing(profile);
+  }
+
+  function validateUsername(value: string): string | null {
+    const username = value.trim().toLowerCase();
+    if (!username) return null;
+    if (username.length < 3 || username.length > 30) return "Username harus 3-30 karakter.";
+    if (!/^[a-z0-9._-]+$/.test(username)) {
+      return "Username hanya boleh huruf kecil, angka, titik, garis bawah, atau strip.";
+    }
+    return null;
   }
 
   async function submitCreate() {
@@ -97,11 +119,17 @@ export default function AdminUsersPage() {
       setCreateError("Kata sandi minimal 6 karakter.");
       return;
     }
+    const usernameError = validateUsername(createForm.username);
+    if (usernameError) {
+      setCreateError(usernameError);
+      return;
+    }
     try {
       await createUser.mutateAsync({
         email: createForm.email.trim(),
         password: createForm.password,
         full_name: createForm.full_name.trim(),
+        username: createForm.username.trim().toLowerCase(),
         role: createForm.role,
       });
       setCreating(false);
@@ -113,15 +141,26 @@ export default function AdminUsersPage() {
   async function submitEdit() {
     if (!editing) return;
     setEditError("");
+    const usernameError = validateUsername(editForm.username);
+    if (usernameError) {
+      setEditError(usernameError);
+      return;
+    }
     try {
       await updateProfile.mutateAsync({
         id: editing.id,
         full_name: editForm.full_name.trim(),
+        username: editForm.username.trim().toLowerCase(),
         role: (editForm.role || null) as AppRole | null,
       });
       setEditing(null);
     } catch (err) {
-      setEditError(err instanceof Error ? err.message : "Gagal menyimpan perubahan.");
+      const message = err instanceof Error ? err.message : "Gagal menyimpan perubahan.";
+      setEditError(
+        message.includes("duplicate") || message.includes("23505")
+          ? "Username sudah dipakai. Pilih username lain."
+          : message
+      );
     }
   }
 
@@ -191,11 +230,12 @@ export default function AdminUsersPage() {
           <ResponsiveTable
             items={profiles}
             getKey={(profile) => profile.id}
-            minWidth="min-w-[720px]"
+            minWidth="min-w-[860px]"
             head={
-              <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-ink-soft">
                 <th className="px-4 py-3 font-semibold">Nama</th>
                 <th className="px-4 py-3 font-semibold">Email</th>
+                <th className="px-4 py-3 font-semibold">Username</th>
                 <th className="px-4 py-3 font-semibold">Peran</th>
                 <th className="px-4 py-3 font-semibold">Bergabung</th>
                 <th className="px-4 py-3 text-right font-semibold">Aksi</th>
@@ -217,6 +257,9 @@ export default function AdminUsersPage() {
                       </p>
                       <p className="mt-0.5 truncate text-xs text-slate-500">
                         {profile.email || "-"}
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-slate-500">
+                        @{profile.username || "belum diset"}
                       </p>
                     </div>
                     <RoleBadge role={profile.role} />
@@ -252,6 +295,9 @@ export default function AdminUsersPage() {
                     ) : null}
                   </td>
                   <td className="px-4 py-3 text-slate-600">{profile.email || "-"}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-slate-600">
+                    {profile.username ? `@${profile.username}` : "-"}
+                  </td>
                   <td className="px-4 py-3">
                     <RoleBadge role={profile.role} />
                   </td>
@@ -313,7 +359,17 @@ export default function AdminUsersPage() {
               placeholder="nama@geeco.id"
             />
           </Field>
-          <Field label="Kata Sandi" hint="Minimal 6 karakter — sampaikan ke pengguna untuk masuk.">
+          <Field
+            label="Username"
+            hint="Opsional. Huruf kecil, angka, titik, garis bawah, atau strip. Bisa dipakai untuk login."
+          >
+            <Input
+              value={createForm.username}
+              onChange={(event) => setCreateForm({ ...createForm, username: event.target.value })}
+              placeholder="rina"
+            />
+          </Field>
+          <Field label="Kata Sandi" hint="Minimal 6 karakter. Sampaikan ke pengguna untuk masuk.">
             <Input
               type="text"
               value={createForm.password}
@@ -363,6 +419,16 @@ export default function AdminUsersPage() {
           </Field>
           <Field label="Email" hint="Email tidak dapat diubah.">
             <Input value={editing?.email ?? ""} disabled />
+          </Field>
+          <Field
+            label="Username"
+            hint="Huruf kecil, angka, titik, garis bawah, atau strip. Bisa dipakai untuk login."
+          >
+            <Input
+              value={editForm.username}
+              onChange={(event) => setEditForm({ ...editForm, username: event.target.value })}
+              placeholder="rina"
+            />
           </Field>
           <Field label="Peran">
             <Select

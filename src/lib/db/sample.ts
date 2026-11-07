@@ -17,11 +17,12 @@ export function useLoadSampleData() {
       ].map((client) => ({ id: newId(), ...client, created_at: stamp, updated_at: stamp }));
 
       const products = [
-        { sku: "GC-BSC-6", name: "Basque Burnt Cheesecake", description: "Box isi 6 potong", unit: "box", price: 185000, active: true },
-        { sku: "GC-BRW-9", name: "Brownies Fudge", description: "Box isi 9 potong", unit: "box", price: 120000, active: true },
-        { sku: "GC-DBT", name: "Dessert Box Tiramisu", description: "Cup 250ml", unit: "cup", price: 25000, active: true },
-        { sku: "GC-PDG", name: "Puding Regal", description: "Cup 200ml", unit: "cup", price: 15000, active: true },
-        { sku: "GC-CRS", name: "Croissant Butter", description: "Satuan", unit: "pcs", price: 18000, active: true },
+        { sku: "GC-DBC", name: "Dubai Chewy", category: "Jajanan viral", description: "Chewy cookie dengan isian krim cokelat pistachio dan kunafa renyah.", unit: "pcs", price: 25000, customer_price: 30000, image_url: "", website_visible: true, sort_order: 1, active: true },
+        { sku: "GC-BSC-6", name: "Basque Burnt Cheesecake", category: "Cake", description: "Box isi 6 potong", unit: "box", price: 185000, customer_price: 210000, image_url: "", website_visible: true, sort_order: 2, active: true },
+        { sku: "GC-BRW-9", name: "Brownies Fudge", category: "Cake", description: "Box isi 9 potong", unit: "box", price: 120000, customer_price: 140000, image_url: "", website_visible: true, sort_order: 3, active: true },
+        { sku: "GC-DBT", name: "Dessert Box Tiramisu", category: "Dessert box", description: "Cup 250ml", unit: "cup", price: 25000, customer_price: 30000, image_url: "", website_visible: true, sort_order: 4, active: true },
+        { sku: "GC-PDG", name: "Puding Regal", category: "Puding", description: "Cup 200ml", unit: "cup", price: 15000, customer_price: 18000, image_url: "", website_visible: true, sort_order: 5, active: true },
+        { sku: "GC-CRS", name: "Croissant Butter", category: "Bakery", description: "Satuan", unit: "pcs", price: 18000, customer_price: 22000, image_url: "", website_visible: true, sort_order: 6, active: true },
       ].map((product) => ({ id: newId(), ...product, created_at: stamp, updated_at: stamp }));
 
       const { error: clientError } = await supabase.from("clients").insert(clients);

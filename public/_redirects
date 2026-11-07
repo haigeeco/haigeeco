@@ -1,0 +1,5 @@
+# Redirect slug lama ke slug baru (HTTP 301) — didukung Cloudflare Pages.
+/produk /products 301
+/produk/* /products 301
+/supplier-dessert-solo /collaboration 301
+/supplier-dessert-solo/* /collaboration 301

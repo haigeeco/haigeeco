@@ -1,13 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #fbf7ee;
+  --foreground: #3b2a20;
+}
+
+@theme {
+  --color-cream: #fbf7ee;
+  --color-cream-deep: #f4ecdd;
+  --color-ink: #3b2a20;
+  --color-ink-soft: #6f6053;
+  --color-line: #e5dac7;
+  --color-pistachio: #5f6e3a;
+  --color-pistachio-dark: #4a572c;
+  --color-pistachio-soft: #e8ebd9;
+  --color-gold: #d9a441;
 }
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces), ui-serif, Georgia, Cambria, "Times New Roman", serif;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -21,78 +38,107 @@ body {
     Roboto, Arial, sans-serif;
 }
 
+::selection {
+  background: #e8ebd9;
+  color: #3b2a20;
+}
+
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid #5f6e3a;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 .article-body :where(h2) {
-  margin-top: 2rem;
-  font-size: 1.5rem;
+  margin-top: 2.25rem;
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: 1.65rem;
   font-weight: 600;
-  color: #0f172a;
+  letter-spacing: -0.01em;
+  color: #3b2a20;
 }
 
 .article-body :where(h3) {
   margin-top: 1.5rem;
-  font-size: 1.25rem;
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: 1.3rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #3b2a20;
 }
 
 .article-body :where(p) {
   margin-top: 1rem;
-  line-height: 1.75;
-  color: #334155;
+  line-height: 1.8;
+  color: #55473b;
 }
 
 .article-body :where(ul) {
   margin-top: 1rem;
   list-style: disc;
   padding-left: 1.5rem;
-  color: #334155;
+  color: #55473b;
 }
 
 .article-body :where(ol) {
   margin-top: 1rem;
   list-style: decimal;
   padding-left: 1.5rem;
-  color: #334155;
+  color: #55473b;
 }
 
 .article-body :where(li) {
-  margin-top: 0.25rem;
+  margin-top: 0.3rem;
 }
 
 .article-body :where(a) {
-  color: #4f46e5;
+  color: #4a572c;
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .article-body :where(blockquote) {
   margin-top: 1rem;
-  border-left: 4px solid #e2e8f0;
+  border-left: 4px solid #e8ebd9;
   padding-left: 1rem;
   font-style: italic;
-  color: #475569;
+  color: #6f6053;
 }
 
 .article-body :where(code) {
-  border-radius: 0.25rem;
-  background: #f1f5f9;
-  padding: 0.1rem 0.3rem;
+  border-radius: 0.375rem;
+  background: #f4ecdd;
+  padding: 0.1rem 0.35rem;
   font-size: 0.875em;
 }
 
 .article-body :where(pre) {
   margin-top: 1rem;
   overflow-x: auto;
-  border-radius: 0.5rem;
-  background: #0f172a;
+  border-radius: 0.75rem;
+  background: #3b2a20;
   padding: 1rem;
-  color: #e2e8f0;
+  color: #f4ecdd;
 }
 
 .article-body :where(img) {
   margin-top: 1rem;
   max-width: 100%;
   height: auto;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
 }
 
 .article-body :where(table) {
@@ -136,7 +182,6 @@ body {
     box-shadow: none !important;
   }
 
-  /* A4 preview is a screen-only aid; print the sheet at full size. */
   .a4-preview-frame {
     height: auto !important;
     overflow: visible !important;
@@ -149,7 +194,6 @@ body {
     box-shadow: none !important;
   }
 
-  /* On paper always use the full table, never the mobile card list. */
   .invoice-items-table {
     display: block !important;
   }

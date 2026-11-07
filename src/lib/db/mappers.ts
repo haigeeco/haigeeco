@@ -34,8 +34,13 @@ export interface ProductRow {
   sku: string;
   name: string;
   description: string;
+  category?: string | null;
   unit: string;
   price: number | string;
+  customer_price?: number | string | null;
+  image_url?: string | null;
+  website_visible?: boolean | null;
+  sort_order?: number | null;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -140,8 +145,13 @@ export function toProduct(row: ProductRow): Product {
     sku: row.sku ?? "",
     name: row.name ?? "",
     description: row.description ?? "",
+    category: row.category ?? "",
     unit: row.unit ?? "",
     price: num(row.price),
+    customerPrice: num(row.customer_price ?? row.price),
+    imageUrl: row.image_url ?? "",
+    websiteVisible: row.website_visible ?? true,
+    sortOrder: row.sort_order ?? 0,
     active: Boolean(row.active),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -154,8 +164,13 @@ export function productToRow(product: Product): ProductRow {
     sku: product.sku,
     name: product.name,
     description: product.description,
+    category: product.category,
     unit: product.unit,
     price: product.price,
+    customer_price: product.customerPrice,
+    image_url: product.imageUrl,
+    website_visible: product.websiteVisible,
+    sort_order: product.sortOrder,
     active: product.active,
     created_at: product.createdAt,
     updated_at: product.updatedAt,
