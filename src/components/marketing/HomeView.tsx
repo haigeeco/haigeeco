@@ -144,7 +144,13 @@ export function HomeView({ products }: { products: SeoProduct[] }) {
           </Link>
         </div>
 
-        <div className="mt-7 grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-14">
+        <div
+          className={
+            rest.length > 0
+              ? "mt-7 grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-14"
+              : "mt-7"
+          }
+        >
           <article className="rounded-3xl bg-cream-deep p-7 md:p-10">
             {spotlight.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -197,12 +203,13 @@ export function HomeView({ products }: { products: SeoProduct[] }) {
             </div>
           </article>
 
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-soft">
-              {t.priceListTitle}
-            </p>
-            <ul className="mt-3 border-t border-line">
-              {rest.map((product) => (
+          {rest.length > 0 ? (
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-soft">
+                {t.priceListTitle}
+              </p>
+              <ul className="mt-3 border-t border-line">
+                {rest.map((product) => (
                 <li
                   key={product.slug}
                   className="flex items-baseline justify-between gap-4 border-b border-line py-4"
@@ -230,9 +237,10 @@ export function HomeView({ products }: { products: SeoProduct[] }) {
                     {product.priceFrom ? formatIDR(product.priceFrom) : t.askPrice}
                   </p>
                 </li>
-              ))}
-            </ul>
-          </div>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </div>
       </section>
 
